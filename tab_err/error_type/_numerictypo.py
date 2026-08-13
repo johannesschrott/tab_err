@@ -114,4 +114,7 @@ def numerictypo(value: str, layout: str = "numpad") -> str:
 
     new_value = "".join([x if i != char_position else new_char for i, x in enumerate(value)])
 
+    if new_value.startswith("."):
+        new_value = "0"+new_value
+
     return new_value
