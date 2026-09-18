@@ -1,8 +1,8 @@
 import pandas as pd
+from pandas.api.types import is_numeric_dtype
 
 from tab_err import error_mechanism, error_type
 from tab_err.api.low_level import create_errors
-from pandas.api.types import is_numeric_dtype
 
 
 def test_numerictypo() -> None:
