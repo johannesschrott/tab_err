@@ -6,7 +6,7 @@ from tab_err.api.low_level import create_errors
 
 
 def test_numerictypo() -> None:
-    """Test that NumericTypo replaces digits and commas with a random neighbouring character."""
+    """Test that NumericTypo replaces digits and commas with a random neighboring character."""
     test_data = pd.DataFrame(
         {
             "A": [1, 2.0, 3, 45, 678, 90],

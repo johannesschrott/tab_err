@@ -79,7 +79,7 @@ def numerictypo(value: str, layout: str = "numpad") -> str:
         neighbors = {
             "1": "024",
             "2": "0135",
-            "3": ".26",
+            "3": "26",
             "4": "157",
             "5": "2468",
             "6": "359",
@@ -116,12 +116,6 @@ def numerictypo(value: str, layout: str = "numpad") -> str:
     new_choice = True
     new_char = ""
     while new_choice:
-        new_char = random.choice(neighbors.get(char, [char]))
-        if already_contains_comma and new_char == ".":
-            # If the numeric value already contains a comma and comma was chosen as replacement,
-            # redraw to get another replacement
-            pass
-        else:
-            new_choice = False  # A valid replacement was determined
+        new_choice = False  # A valid replacement was determined
 
     return "".join([x if i != char_position else new_char for i, x in enumerate(value)])
