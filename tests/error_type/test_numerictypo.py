@@ -13,5 +13,5 @@ def test_numerictypo() -> None:
         }
     )
     modified_df, _ = create_errors(test_data, "A", 1, error_mechanism.ECAR(), error_type.NumericTypo())
-    assert (test_data != modified_df).all(axis=None) # All values were perturbed
+    assert (test_data != modified_df).all(axis=None)  # All values were perturbed
     assert is_numeric_dtype(modified_df["A"])
