@@ -108,11 +108,15 @@ def numerictypo(value: str, layout: str = "numpad") -> str:
     if value == "":  # return random char if empty string
         return random.choice(list(neighbors.keys()))
 
-    char_position = random.choice(list(range(len(value))))
-
     new_choice = True
-    new_char = ""
     while new_choice:
-        new_choice = False  # A valid replacement was determined
+        new_choice = False
+        char_position = random.choice(list(range(len(value))))
+        if value[char_position] in [',','.']:
+            new_choice = True
+        else:
+            new_char = random.choice(neighbors[value[char_position]])
 
-    return "".join([x if i != char_position else new_char for i, x in enumerate(value)])
+
+    res = "".join([x if i != char_position else new_char for i, x in enumerate(value)])
+    return res
