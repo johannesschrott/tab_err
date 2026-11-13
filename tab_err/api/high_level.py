@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import operator
+import random
 import warnings
 from functools import reduce
 from typing import TYPE_CHECKING
@@ -296,56 +297,38 @@ def create_errors_with_config(  # noqa: PLR0913
     )
     col_num_models = _build_column_number_of_models_dictionary(data=data, column_types=col_type, column_mechanisms=col_mechanisms)
 
-    if n_error_types_per_column == 1 or len(col_type.values()) == 1:
-        if n_error_models_per_column > 0:
-            error_rate = error_rate / n_error_models_per_column
-            config_dictionary: dict[str | int, list[ErrorModel]] = {
-                column: [] for column in data.columns if col_num_models[column] > 0
-            }  # Filter out those columns with no valid error models
+    if n_error_models_per_column > 0:
+        error_rate = error_rate / (n_error_models_per_column * n_error_types_per_column)
+        config_dictionary: dict[str | int, list[ErrorModel]] = {
+            column: [] for column in data.columns if col_num_models[column] > 0
+        }  # Filter out those columns with no valid error models
 
-            if error_rate * len(data) < 1:  # This value is calculated and rounded to 0 in the sample function of the error mechanism subclasses "n_errors"
-                msg = f"With a per-model error rate of: {error_rate} and {len(data)} rows, 0 errors will be introduced."
-                warnings.warn(msg, stacklevel=2)
+        if error_rate * len(data) < 1:  # This value is calculated and rounded to 0 in the sample function of the error mechanism subclasses "n_errors"
+            msg = f"With a per-model error rate of: {error_rate} and {len(data)} rows, 0 errors will be introduced."
+            warnings.warn(msg, stacklevel=2)
 
-            for column, error_model_list in config_dictionary.items():
-                for _ in range(n_error_models_per_column):
+        for column, error_model_list in config_dictionary.items():
+            random.seed(column)
+            random.shuffle(col_type[column])
+            random.shuffle(col_mechanisms[column])
+
+            for i in range(n_error_models_per_column):
+                for j in range(n_error_types_per_column):
                     error_model_list.append(
                         ErrorModel(
-                            error_type=col_type[column][random_generator.choice(len(col_type[column]))],
-                            error_mechanism=col_mechanisms[column][random_generator.choice(len(col_mechanisms[column]))],
+                            error_type=col_type[column][j],
+                            error_mechanism=col_mechanisms[column][i],
                             error_rate=error_rate,
                         )
                     )
-            config = MidLevelConfig(config_dictionary)
-        else:  # n_error_models_per_column is 0 or less.
-            msg = f"n_error_models_per_column is: {n_error_models_per_column} and should be a positive integer"
-            raise ValueError(msg)
+        config = MidLevelConfig(config_dictionary)
+    else:  # n_error_models_per_column is 0 or less.
+        msg = f"n_error_models_per_column is: {n_error_models_per_column} and should be a positive integer"
+        raise ValueError(msg)
 
 
-        # Create Errors & Return
-        dirty_data, error_mask = mid_level.create_errors(data_copy, config)
-        return dirty_data, error_mask, config
+    # Create Errors & Return
+    dirty_data, error_mask = mid_level.create_errors(data_copy, config)
+    return dirty_data, error_mask, config
 
-    elif n_error_types_per_column < 1:
-        pass
-    else:
-        data_dirty = data.copy()
-        error_mask = pd.DataFrame(data=False, index=data.index, columns=data.columns)
 
-        if n_error_models_per_column < 1:
-            n_error_models_per_column = 1
-        error_rate = error_rate / n_error_types_per_column
-
-        for column in data.columns:
-            mechanisms = set(*col_mechanisms[column])
-            for _ in len(col_mechanisms[column]):
-                error_mechanism = mechanisms.pop()
-                data_dirty, new_mask = low_level.create_errors(data,
-                                                                 column,
-                                                                 error_rate,
-                                                                 error_mechanism,
-                                                                 error_type=None,
-                                                                 error_types=col_type[column])
-                error_mask = reduce(operator.or_, [error_mask, new_mask])
-
-        return data_dirty, error_mask
