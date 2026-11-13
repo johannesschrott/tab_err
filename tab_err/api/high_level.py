@@ -334,7 +334,7 @@ def create_errors_with_config(  # noqa: PLR0913
 
         if n_error_models_per_column < 1:
             n_error_models_per_column = 1
-        error_rate = error_rate / n_error_models_per_column
+        error_rate = error_rate / n_error_types_per_column
 
         for column in data.columns:
             mechanisms = set(*col_mechanisms[column])
