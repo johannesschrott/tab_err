@@ -102,3 +102,47 @@ class TestHighLevelAPI:
         assert pytest.approx(error_rate) == data_4rows_5columns_error_mask.to_numpy().mean()
         assert pytest.approx(error_rate) == data_10rows_3columns_error_mask.to_numpy().mean()
         assert pytest.approx(error_rate) == data_100rows_3columns_error_mask.to_numpy().mean()
+
+    def test_create_errors_more_models_more_types(self, test_data: dict[str, pd.DataFrame]) -> None:
+        """Test that when more error models are introduced, the create_errors method has expected DataFrame return."""
+        error_rate = 1.0
+        seed = 42
+        n_error_models = 2
+        n_error_types = 2
+
+        modified_data_4rows_5columns, data_4rows_5columns_error_mask = create_errors(
+            test_data["data_4rows_5columns"], error_rate, n_error_models_per_column=n_error_models, n_error_types_per_column=n_error_types, seed=seed
+        )
+        modified_data_10rows_3columns, data_10rows_3columns_error_mask = create_errors(
+            test_data["data_10rows_3columns"], error_rate, n_error_models_per_column=n_error_models, n_error_types_per_column=n_error_types, seed=seed
+        )
+        modified_data_100rows_3columns, data_100rows_3columns_error_mask = create_errors(
+            test_data["data_100rows_3columns"], error_rate, n_error_models_per_column=n_error_models, n_error_types_per_column=n_error_types, seed=seed
+        )
+
+        # Check that they are still dataframes
+        assert isinstance(modified_data_4rows_5columns, pd.DataFrame)
+        assert isinstance(data_4rows_5columns_error_mask, pd.DataFrame)
+        assert isinstance(modified_data_10rows_3columns, pd.DataFrame)
+        assert isinstance(data_10rows_3columns_error_mask, pd.DataFrame)
+        assert isinstance(modified_data_100rows_3columns, pd.DataFrame)
+        assert isinstance(data_100rows_3columns_error_mask, pd.DataFrame)
+
+        # Check Shapes
+        assert modified_data_4rows_5columns.shape == test_data["data_4rows_5columns"].shape
+        assert data_4rows_5columns_error_mask.shape == test_data["data_4rows_5columns"].shape
+        assert modified_data_10rows_3columns.shape == test_data["data_10rows_3columns"].shape
+        assert data_10rows_3columns_error_mask.shape == test_data["data_10rows_3columns"].shape
+        assert modified_data_100rows_3columns.shape == test_data["data_100rows_3columns"].shape
+        assert data_100rows_3columns_error_mask.shape == test_data["data_100rows_3columns"].shape
+
+        # Assert the error masks contain only boolean values
+        assert data_4rows_5columns_error_mask.dtypes.apply(lambda dt: np.issubdtype(dt, np.bool_)).all()
+        assert data_10rows_3columns_error_mask.dtypes.apply(lambda dt: np.issubdtype(dt, np.bool_)).all()
+        assert data_100rows_3columns_error_mask.dtypes.apply(lambda dt: np.issubdtype(dt, np.bool_)).all()
+
+        # Assert that the error masks have the correct proportion of True to False
+        assert pytest.approx(error_rate) == data_4rows_5columns_error_mask.to_numpy().mean()
+        assert pytest.approx(error_rate) == data_10rows_3columns_error_mask.to_numpy().mean()
+        assert pytest.approx(error_rate) == data_100rows_3columns_error_mask.to_numpy().mean()
+        
