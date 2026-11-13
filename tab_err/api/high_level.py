@@ -231,6 +231,7 @@ def create_errors(  # noqa: PLR0913, PLR0917
         data=data,
         error_rate=error_rate,
         n_error_models_per_column=n_error_models_per_column,
+        n_error_types_per_column=n_error_types_per_column,
         error_types_to_include=error_types_to_include,
         error_types_to_exclude=error_types_to_exclude,
         error_mechanisms_to_include=error_mechanisms_to_include,
